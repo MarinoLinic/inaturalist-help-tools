@@ -1,2 +1,5 @@
-# inaturalist-unique-taxon-extractor
-Extract unique taxon levels from your export.
+# iNaturalist Help Tools
+
+A collection of tools for exported iNaturalist data.
+
+Website: https://marinolinic.github.io/inaturalist-help-tools/index.html
