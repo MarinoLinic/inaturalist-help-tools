@@ -1,81 +1,351 @@
-body {
-	font-family: sans-serif;
-	margin: 20px;
-	background-color: #f4f4f4;
-	color: #333;
+/* === style.css === */
+/* Modern Dark Mode Styles EXCLUSIVELY for taxon-extractor.html (Application Page) */
+
+:root {
+	/* Consistent Dark Mode Palette with landing page */
+	--app-bg: #0d1117;
+	--app-surface-1: #161b22; /* Cards, interactive surfaces */
+	--app-surface-2: #010409; /* Header/footer, or slightly different bg */
+	--app-border: #30363d;
+	--app-border-hover: #8b949e; /* For interactive borders */
+	--app-text-primary: #e6edf3;
+	--app-text-secondary: #8b949e;
+	--app-text-placeholder: #484f58;
+	--app-accent-primary: #58a6ff; /* Blue */
+	--app-accent-primary-hover: #79c0ff;
+	--app-accent-secondary: #3fb950; /* Green for success/download */
+	--app-accent-secondary-hover: #51c66c;
+	--app-accent-glow: rgba(88, 166, 255, 0.15);
+	--app-error-color: #f85149;
+
+	--app-font-sans-serif: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+		sans-serif;
+	--app-font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+
+	--app-border-radius-sm: 4px;
+	--app-border-radius-md: 6px;
+	--app-border-radius-lg: 8px;
+
+	--app-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.06);
+	--app-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.container {
-	background-color: #fff;
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Base styles */
+.app-page-body *,
+.app-page-body *::before,
+.app-page-body *::after {
+	box-sizing: border-box;
 }
 
-h1,
-h2 {
-	color: #333;
+.app-page-body {
+	font-family: var(--app-font-sans-serif);
+	margin: 0;
+	background-color: var(--app-bg);
+	color: var(--app-text-primary);
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	padding: 0; /* Remove default padding */
 }
 
-section {
+.app-container {
+	width: 100%;
+	max-width: 960px; /* Max width for the app content */
+	margin: 0 auto;
+	padding: 20px 25px 40px; /* Add padding inside the container */
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+/* Header */
+.app-page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px 0 30px;
+	border-bottom: 1px solid var(--app-border);
+	margin-bottom: 40px;
+}
+.app-page-header .header-content h1 {
+	font-size: 1.75rem;
+	font-weight: 600;
+	margin: 0 0 4px 0;
+	color: var(--app-text-primary);
+}
+.app-page-header .subtitle {
+	font-size: 0.95rem;
+	color: var(--app-text-secondary);
+	margin: 0;
+}
+.back-to-hub-button {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 12px;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--app-text-secondary);
+	background-color: var(--app-surface-1);
+	border: 1px solid var(--app-border);
+	border-radius: var(--app-border-radius-md);
+	text-decoration: none;
+	transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+.back-to-hub-button svg {
+	margin-right: 6px;
+}
+.back-to-hub-button:hover {
+	color: var(--app-text-primary);
+	background-color: rgba(255, 255, 255, 0.05); /* Slight bg change on hover */
+	border-color: var(--app-border-hover);
+}
+
+/* Main Content & Step Cards */
+.app-main-content {
+	display: flex;
+	flex-direction: column;
+	gap: 30px; /* Spacing between cards */
+	flex-grow: 1;
+}
+
+.step-card {
+	background-color: var(--app-surface-1);
+	padding: 25px 30px;
+	border-radius: var(--app-border-radius-lg);
+	border: 1px solid var(--app-border);
+	box-shadow: var(--app-shadow-sm);
+}
+.step-header {
+	display: flex;
+	align-items: center;
 	margin-bottom: 20px;
 	padding-bottom: 15px;
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid var(--app-border);
 }
-section:last-child {
-	border-bottom: none;
+.step-header .step-number {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background-color: var(--app-accent-primary);
+	color: var(--app-bg); /* Dark text on bright circle */
+	font-weight: 600;
+	font-size: 0.9rem;
+	margin-right: 12px;
+}
+.step-header h2 {
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--app-text-primary);
+	margin: 0;
 }
 
-input[type='file'],
-button {
-	padding: 10px;
-	margin-top: 5px;
-	border-radius: 4px;
-	border: 1px solid #ccc;
+/* File Input */
+.file-input-area {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
-
-button {
-	background-color: #007bff;
-	color: white;
+.file-input-hidden {
+	display: none;
+}
+.file-input-label {
+	display: flex; /* Use flex for icon and text */
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding: 40px 20px;
+	border: 2px dashed var(--app-border);
+	border-radius: var(--app-border-radius-md);
+	background-color: rgba(255, 255, 255, 0.02); /* Very subtle background for drop area */
+	color: var(--app-text-secondary);
 	cursor: pointer;
-	border: none;
+	transition: border-color 0.2s ease, background-color 0.2s ease;
+	text-align: center;
+}
+.file-input-label:hover {
+	border-color: var(--app-accent-primary);
+	background-color: rgba(88, 166, 255, 0.05); /* Subtle accent glow */
+}
+.file-input-label svg {
+	width: 32px;
+	height: 32px;
+	margin-bottom: 12px;
+	color: var(--app-accent-primary);
+}
+.file-input-label span {
+	font-weight: 500;
+	font-size: 1rem;
+}
+.file-name-display {
+	margin-top: 15px;
+	font-size: 0.9rem;
+	color: var(--app-text-secondary);
+	font-style: italic;
 }
 
-button:disabled {
-	background-color: #ccc;
-	cursor: not-allowed;
+/* Rank Checkboxes */
+.rank-checkbox-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 12px;
+}
+.rank-checkbox-grid div {
+	/* Individual checkbox + label container */
+	display: flex;
+	align-items: center;
+	padding: 10px 12px;
+	background-color: rgba(255, 255, 255, 0.03);
+	border-radius: var(--app-border-radius-sm);
+	border: 1px solid var(--app-border);
+	transition: border-color 0.2s, background-color 0.2s;
+}
+.rank-checkbox-grid div:hover {
+	border-color: var(--app-border-hover);
+	background-color: rgba(255, 255, 255, 0.05);
+}
+.rank-checkbox-grid input[type='checkbox'] {
+	margin-right: 10px;
+	width: 16px;
+	height: 16px;
+	accent-color: var(--app-accent-primary);
+	cursor: pointer;
+	flex-shrink: 0; /* Prevent shrinking */
+}
+.rank-checkbox-grid label {
+	font-size: 0.9rem;
+	color: var(--app-text-primary);
+	cursor: pointer;
+	user-select: none; /* Prevent text selection on label click */
+	line-height: 1.4;
 }
 
-button:hover:not(:disabled) {
-	background-color: #0056b3;
+/* Action Area & Buttons */
+.action-area {
+	text-align: center; /* Center the button */
+	margin-top: 10px; /* Space above button if it's separate from cards */
+	margin-bottom: 10px;
 }
-
-#rankCheckboxes div {
-	margin-bottom: 5px;
-}
-#rankCheckboxes label {
-	margin-left: 8px;
-}
-
-#outputLog {
-	background-color: #e9e9e9;
-	padding: 10px;
-	border-radius: 4px;
-	max-height: 200px;
-	overflow-y: auto;
-	white-space: pre-wrap; /* To wrap long lines */
-	font-family: monospace;
-}
-
-.download-link {
-	display: inline-block;
-	margin-top: 5px;
-	padding: 8px 12px;
-	background-color: #28a745;
-	color: white;
+.btn-app {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px 24px;
+	font-size: 1rem;
+	font-weight: 500;
+	border-radius: var(--app-border-radius-md);
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
 	text-decoration: none;
-	border-radius: 4px;
+}
+.btn-app svg {
+	margin-right: 8px;
+}
+.btn-app-primary {
+	background-color: var(--app-accent-primary);
+	color: var(--app-bg); /* Dark text on bright button */
+	font-weight: 600;
+}
+.btn-app-primary:hover:not(:disabled) {
+	background-color: var(--app-accent-primary-hover);
+	transform: translateY(-1px);
+}
+.btn-app-primary:disabled {
+	background-color: var(--app-text-placeholder);
+	color: var(--app-text-secondary);
+	cursor: not-allowed;
+	opacity: 0.7;
+}
+
+/* Output Log */
+#outputLogSection pre#outputLog {
+	background-color: var(--app-surface-2); /* Darker bg for log */
+	color: var(--app-text-secondary);
+	padding: 15px;
+	border-radius: var(--app-border-radius-md);
+	max-height: 250px;
+	overflow-y: auto;
+	white-space: pre-wrap;
+	font-family: var(--app-font-mono);
+	font-size: 0.875rem;
+	border: 1px solid var(--app-border);
+	line-height: 1.5;
+}
+
+/* Download Links */
+.download-links-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 12px;
+}
+.download-link {
+	/* Applied by JS */
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 15px;
+	background-color: var(--app-accent-secondary);
+	color: var(--app-bg); /* Dark text for contrast */
+	font-weight: 500;
+	text-decoration: none;
+	border-radius: var(--app-border-radius-md);
+	font-size: 0.9rem;
+	transition: background-color 0.2s ease, transform 0.1s ease;
 }
 .download-link:hover {
-	background-color: #218838;
+	background-color: var(--app-accent-secondary-hover);
+	transform: translateY(-1px);
+}
+
+/* Footer */
+.app-page-footer {
+	text-align: center;
+	padding: 30px 0 20px;
+	margin-top: 40px;
+	border-top: 1px solid var(--app-border);
+	font-size: 0.875rem;
+	color: var(--app-text-secondary);
+}
+.app-page-footer p {
+	margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+	.app-container {
+		padding: 15px 20px 30px;
+	}
+	.app-page-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+		padding-bottom: 20px;
+		margin-bottom: 30px;
+	}
+	.app-page-header .header-content h1 {
+		font-size: 1.5rem;
+	}
+	.step-card {
+		padding: 20px;
+	}
+	.step-header h2 {
+		font-size: 1.1rem;
+	}
+	.file-input-label {
+		padding: 30px 15px;
+	}
+	.rank-checkbox-grid {
+		grid-template-columns: 1fr; /* Single column for checkboxes */
+	}
+	.btn-app {
+		width: 100%; /* Full width buttons on mobile */
+		font-size: 0.95rem;
+	}
+	.download-links-grid {
+		grid-template-columns: 1fr;
+	}
 }
