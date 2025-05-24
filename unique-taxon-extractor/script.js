@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
 	// --- Element Selection ---
-	// It's good to check if these elements exist to prevent errors if HTML changes
 	const csvFileInput = document.getElementById('csvFileInput')
 	const rankSelectionSection = document.getElementById('rankSelectionSection')
 	const rankCheckboxesDiv = document.getElementById('rankCheckboxes')
 	const extractButton = document.getElementById('extractButton')
-	const outputLogPre = document.getElementById('outputLog') // Target the <pre> tag
-	const outputLogSection = document.getElementById('outputLogSection') // Target the whole section
+	const outputLogPre = document.getElementById('outputLog')
+	const outputLogSection = document.getElementById('outputLogSection')
 	const downloadSection = document.getElementById('downloadSection')
-	const downloadLinksContainer = document.getElementById('downloadLinksContainer') // Corrected ID
-	const fileNameDisplay = document.getElementById('fileNameDisplay') // For showing the selected file name
-	const currentYearAppSpan = document.getElementById('currentYearApp') // For the year in footer
+	const downloadLinksContainer = document.getElementById('downloadLinksContainer')
+	const fileNameDisplay = document.getElementById('fileNameDisplay')
+	const currentYearAppSpan = document.getElementById('currentYearApp')
 
 	// --- State Variables ---
 	let parsedData = null
@@ -28,25 +27,40 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (outputLogPre) {
 			const timestamp = new Date().toLocaleTimeString()
 			const prefix = type.toUpperCase()
-			outputLogPre.textContent += `[${timestamp} ${prefix}]: ${message}\n`
-			outputLogPre.scrollTop = outputLogPre.scrollHeight // Auto-scroll
+			const logEntry = document.createElement('div')
+			logEntry.className = `log-entry log-${type}`
+			logEntry.textContent = `[${timestamp} ${prefix}]: ${message}`
+			outputLogPre.appendChild(logEntry)
+			// Auto-scroll the log container itself
+			outputLogPre.scrollTop = outputLogPre.scrollHeight
 		}
-		if (type === 'error') {
-			console.error(message)
-		} else {
-			console.log(message)
+		if (type === 'error') console.error(message)
+		else console.log(message)
+	}
+
+	function scrollToElement(element) {
+		if (element) {
+			element.scrollIntoView({ behavior: 'smooth', block: 'start' })
 		}
 	}
 
-	function clearPreviousRun() {
+	function scrollToPageBottom() {
+		window.scrollTo({
+			top: document.body.scrollHeight,
+			behavior: 'smooth',
+		})
+	}
+
+	function clearPreviousRun(isNewFile = false) {
+		if (isNewFile) {
+			if (outputLogPre) outputLogPre.innerHTML = '' // Clear log for new file
+		}
 		if (rankCheckboxesDiv) rankCheckboxesDiv.innerHTML = ''
 		if (rankSelectionSection) rankSelectionSection.style.display = 'none'
 		if (downloadLinksContainer) downloadLinksContainer.innerHTML = ''
 		if (downloadSection) downloadSection.style.display = 'none'
-		// Do not clear the log completely on each new file, append instead or provide a clear button
-		// if (outputLogPre) outputLogPre.textContent = '';
 		if (extractButton) extractButton.disabled = true
-		if (fileNameDisplay) fileNameDisplay.textContent = 'No file selected'
+		if (isNewFile && fileNameDisplay) fileNameDisplay.textContent = 'No file selected'
 
 		parsedData = null
 		headers = []
@@ -56,22 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
 	// --- Event Listeners ---
 	if (csvFileInput) {
 		csvFileInput.addEventListener('change', (event) => {
-			// Don't clear the log entirely here, just prepare for new processing
-			// clearPreviousRun(); // This clears too much if user just re-selects
-			// Reset parts relevant to a new file
-			if (rankCheckboxesDiv) rankCheckboxesDiv.innerHTML = ''
-			if (rankSelectionSection) rankSelectionSection.style.display = 'none'
-			if (downloadLinksContainer) downloadLinksContainer.innerHTML = ''
-			if (downloadSection) downloadSection.style.display = 'none'
-			if (extractButton) extractButton.disabled = true
-			parsedData = null
-			headers = []
-			RANK_TO_COLUMN_MAPPING = {}
+			clearPreviousRun(true)
 
 			const file = event.target.files[0]
 			if (file) {
 				if (fileNameDisplay) fileNameDisplay.textContent = file.name
-				if (outputLogSection) outputLogSection.style.display = 'block' // Show log section
+				if (outputLogSection) outputLogSection.style.display = 'block'
 				logMessage(`Selected file: ${file.name}`)
 
 				Papa.parse(file, {
@@ -82,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (results.errors.length > 0) {
 							logMessage('Error parsing CSV:', 'error')
 							results.errors.forEach((err) => logMessage(`- ${err.message}`, 'error'))
-							alert('Error parsing CSV. Check console or log for details.')
+							// No alert here, relies on logMessage
 							if (fileNameDisplay) fileNameDisplay.textContent = 'Error parsing file.'
 							return
 						}
@@ -91,28 +95,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 						if (headers.length === 0) {
 							logMessage('Could not determine headers from CSV. Ensure the first row contains headers.', 'error')
-							alert('Could not determine headers from CSV. Please check your file.')
 							return
 						}
 
 						logMessage('CSV parsed successfully.')
 						populateRankSelection()
 						if (extractButton && Object.keys(RANK_TO_COLUMN_MAPPING).length > 0) {
-							extractButton.disabled = false // Enable only if ranks are found
+							extractButton.disabled = false
 						}
 						if (rankSelectionSection && Object.keys(RANK_TO_COLUMN_MAPPING).length > 0) {
 							rankSelectionSection.style.display = 'block'
+						} else if (Object.keys(RANK_TO_COLUMN_MAPPING).length === 0) {
+							logMessage('No valid taxonomic rank columns found in the CSV.', 'warning')
 						}
 					},
 					error: (error) => {
 						logMessage(`Error during CSV parsing: ${error.message}`, 'error')
-						alert(`Error during CSV parsing: ${error.message}`)
 						if (fileNameDisplay) fileNameDisplay.textContent = 'Error parsing file.'
 					},
 				})
 			} else {
-				// If no file is selected (e.g., user cancels file dialog)
-				clearPreviousRun() // Or a more specific reset
+				clearPreviousRun(true)
 			}
 		})
 	} else {
@@ -122,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	function populateRankSelection() {
 		if (!rankCheckboxesDiv || !headers) return
 
-		rankCheckboxesDiv.innerHTML = '' // Clear previous
-		RANK_TO_COLUMN_MAPPING = {} // Reset
+		rankCheckboxesDiv.innerHTML = ''
+		RANK_TO_COLUMN_MAPPING = {}
 
 		headers.forEach((header) => {
 			if (taxonColumnPattern.test(header)) {
@@ -131,20 +134,16 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (friendlyName.includes('_')) {
 					friendlyName = friendlyName.replace(/_/g, '')
 				}
-
 				RANK_TO_COLUMN_MAPPING[friendlyName] = header
-
-				const checkboxContainer = document.createElement('div') // Each checkbox in its own div
+				const checkboxContainer = document.createElement('div')
 				const checkbox = document.createElement('input')
 				checkbox.type = 'checkbox'
 				checkbox.id = `rank_${friendlyName}`
 				checkbox.value = friendlyName
 				checkbox.name = 'taxonomic_rank'
-
 				const label = document.createElement('label')
 				label.htmlFor = `rank_${friendlyName}`
 				label.textContent = friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1)
-
 				checkboxContainer.appendChild(checkbox)
 				checkboxContainer.appendChild(label)
 				rankCheckboxesDiv.appendChild(checkboxContainer)
@@ -153,12 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		if (Object.keys(RANK_TO_COLUMN_MAPPING).length === 0) {
 			logMessage("No columns matching the pattern 'taxon_*_name' found in the CSV headers.", 'warning')
-			if (rankSelectionSection) rankSelectionSection.style.display = 'none' // Hide if no ranks
+			if (rankSelectionSection) rankSelectionSection.style.display = 'none'
 			if (extractButton) extractButton.disabled = true
 		} else {
 			logMessage(`Found ${Object.keys(RANK_TO_COLUMN_MAPPING).length} potential taxonomic rank columns.`)
 			if (rankSelectionSection) rankSelectionSection.style.display = 'block'
-			// Extract button will be enabled by the file input's complete callback
 		}
 	}
 
@@ -166,18 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		extractButton.addEventListener('click', () => {
 			if (!parsedData || parsedData.length === 0) {
 				logMessage('No data loaded to extract from. Please select a file.', 'error')
-				alert('Please select a CSV file first.')
+				// alert('Please select a CSV file first.'); // Removed
 				return
 			}
 
 			const selectedRankCheckboxes = document.querySelectorAll('input[name="taxonomic_rank"]:checked')
 			if (selectedRankCheckboxes.length === 0) {
 				logMessage('No taxonomic ranks selected for extraction.', 'error')
-				alert('Please select at least one taxonomic rank.')
+				// alert('Please select at least one taxonomic rank.'); // Removed
 				return
 			}
 
-			if (downloadLinksContainer) downloadLinksContainer.innerHTML = '' // Clear previous links
+			if (downloadLinksContainer) downloadLinksContainer.innerHTML = ''
 			if (downloadSection) downloadSection.style.display = 'block'
 			logMessage('\n--- Starting Extraction Process ---')
 
@@ -194,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const uniqueValues = new Set()
 				parsedData.forEach((row) => {
-					const value = row[actualColumnName] // PapaParse with header:true gives direct property access
+					const value = row[actualColumnName]
 					if (value !== undefined && value !== null && String(value).trim() !== '') {
 						uniqueValues.add(String(value).trim())
 					}
@@ -211,11 +209,23 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			})
 
-			logMessage(`--- Extraction Complete: Successfully created files for ${successfullyExtractedCount} rank(s). ---`)
+			const finalMessage = `--- Extraction Complete: Successfully created files for ${successfullyExtractedCount} rank(s). ---`
+			logMessage(finalMessage)
+
 			if (successfullyExtractedCount === 0 && selectedRankCheckboxes.length > 0) {
-				alert('Extraction finished, but no data was found for the selected ranks or no files could be generated.')
+				logMessage(
+					'Extraction finished, but no data was found for the selected ranks or no files could be generated.',
+					'warning'
+				)
 			} else if (successfullyExtractedCount > 0) {
-				console.log(`Extraction finished! ${successfullyExtractedCount} file(s) are ready for download.`)
+				logMessage(`Download section updated. ${successfullyExtractedCount} file(s) are ready.`, 'info')
+			}
+
+			// Scroll to the download section or page bottom
+			if (downloadSection && downloadSection.style.display === 'block') {
+				scrollToElement(downloadSection)
+			} else {
+				scrollToPageBottom()
 			}
 		})
 	} else {
@@ -243,10 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		link.href = url
 		link.download = `${rankName}.csv`
 		link.textContent = `Download ${rankName}.csv`
-		link.className = 'download-link' // Ensure this class is applied for styling
+		link.className = 'download-link'
 
-		// Optionally, wrap in a p or div for better spacing if needed by CSS
-		const listItem = document.createElement('div') // Or 'p'
+		const listItem = document.createElement('div')
 		listItem.appendChild(link)
 		downloadLinksContainer.appendChild(listItem)
 	}
