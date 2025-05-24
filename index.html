@@ -3,44 +3,59 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Taxonomy Extractor</title>
+		<title>BioData Tools Hub</title>
+		<!-- Link to your main CSS file in the root directory -->
 		<link rel="stylesheet" href="style.css" />
-		<!-- Include Papa Parse for robust CSV parsing -->
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+		<!-- Google Fonts for a modern look -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Roboto:wght@300;400;500&display=swap"
+			rel="stylesheet"
+		/>
 	</head>
-	<body>
-		<div class="container">
-			<h1>Taxonomic Data Extractor</h1>
+	<body class="landing-page-body">
+		<header class="landing-header">
+			<div class="container">
+				<h1>iNaturalist Help Tools</h1>
+				<p class="tagline">By Marino Linić</p>
+			</div>
+		</header>
 
-			<section>
-				<h2>1. Select Input CSV File</h2>
-				<input type="file" id="csvFileInput" accept=".csv" />
-			</section>
-
-			<section id="rankSelectionSection" style="display: none">
-				<h2>2. Select Taxonomic Ranks to Extract</h2>
-				<div id="rankCheckboxes">
-					<!-- Checkboxes will be populated here by JavaScript -->
+		<main class="landing-main container">
+			<section class="tools-grid">
+				<div class="tool-card">
+					<h2>Unique Taxon Extractor</h2>
+					<p>Upload a CSV file and quickly extract lists of unique taxonomic ranks (genus, species, family, etc.).</p>
+					<a href="unique-taxon-extractor/taxon-extractor.html" class="btn btn-primary">Launch Tool →</a>
 				</div>
-			</section>
 
-			<section>
-				<button id="extractButton" disabled>Extract Data</button>
-			</section>
+				<!-- Example of how you might add another tool in the future -->
+				<!--
+            <div class="tool-card disabled">
+                <div class="tool-icon">📊</div>
+                <h2>Data Visualizer (Coming Soon)</h2>
+                <p>Visualize your biological datasets with interactive charts and graphs. Currently under development.</p>
+                <a href="#" class="btn btn-secondary disabled-link">Coming Soon</a>
+            </div>
 
-			<section id="outputLogSection">
-				<h2>Log:</h2>
-				<pre id="outputLog"></pre>
+            <div class="tool-card disabled">
+                <div class="tool-icon">⚙️</div>
+                <h2>Sequence Analyzer (Coming Soon)</h2>
+                <p>Perform basic sequence analysis tasks. Stay tuned for updates!</p>
+                <a href="#" class="btn btn-secondary disabled-link">Coming Soon</a>
+            </div>
+            -->
 			</section>
+		</main>
 
-			<section id="downloadSection" style="display: none">
-				<h2>3. Download Extracted Files</h2>
-				<div id="downloadLinks">
-					<!-- Download links will be populated here -->
-				</div>
-			</section>
-		</div>
+		<footer class="landing-footer">
+			<div class="container">
+				<p>This page is not affiliated with iNaturalist.</p>
+			</div>
+		</footer>
 
-		<script src="script.js"></script>
+		<!-- Simple script for the landing page (e.g., current year) -->
+		<script>
+			document.getElementById('currentYearLanding').textContent = new Date().getFullYear()
+		</script>
 	</body>
 </html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Taxonomy Extractor</title>
+		<link rel="stylesheet" href="style.css" />
+		<!-- Include Papa Parse for robust CSV parsing -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<h1>Taxonomic Data Extractor</h1>
+
+			<section>
+				<h2>1. Select Input CSV File</h2>
+				<input type="file" id="csvFileInput" accept=".csv" />
+			</section>
+
+			<section id="rankSelectionSection" style="display: none">
+				<h2>2. Select Taxonomic Ranks to Extract</h2>
+				<div id="rankCheckboxes">
+					<!-- Checkboxes will be populated here by JavaScript -->
+				</div>
+			</section>
+
+			<section>
+				<button id="extractButton" disabled>Extract Data</button>
+			</section>
+
+			<section id="outputLogSection">
+				<h2>Log:</h2>
+				<pre id="outputLog"></pre>
+			</section>
+
+			<section id="downloadSection" style="display: none">
+				<h2>3. Download Extracted Files</h2>
+				<div id="downloadLinks">
+					<!-- Download links will be populated here -->
+				</div>
+			</section>
+		</div>
+
+		<script src="script.js"></script>
+	</body>
+</html>

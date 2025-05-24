@@ -1,81 +1,228 @@
-body {
-	font-family: sans-serif;
-	margin: 20px;
-	background-color: #f4f4f4;
-	color: #333;
+/* === landing-style.css === */
+/* Modern Dark Mode Styles EXCLUSIVELY for index.html (Landing Page) */
+
+:root {
+	/* Dark Mode Palette - Vercel/GitHub Inspired */
+	--dark-bg: #0d1117; /* Deep dark background */
+	--dark-surface-1: #161b22; /* For cards and distinct surfaces */
+	--dark-surface-2: #010409; /* Slightly darker, for header/footer contrast if needed */
+	--dark-border: #30363d; /* Subtle borders */
+	--dark-border-hover: #8b949e;
+	--dark-text-primary: #e6edf3; /* Primary text - very light gray */
+	--dark-text-secondary: #8b949e; /* Secondary text - medium gray */
+	--dark-accent-primary: #58a6ff; /* Bright, accessible blue */
+	--dark-accent-primary-hover: #79c0ff; /* Lighter blue for hover */
+	--dark-accent-secondary: #3fb950; /* A green for variety or success states */
+	--dark-accent-glow: rgba(88, 166, 255, 0.15); /* Subtle glow for interactive elements */
+	--dark-shadow-light: rgba(0, 0, 0, 0.1); /* Very subtle shadow for depth */
+	--dark-shadow-medium: rgba(0, 0, 0, 0.3);
+
+	--landing-font-sans-serif: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+		Arial, sans-serif;
+	--landing-font-body: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+		sans-serif;
+
+	--landing-border-radius-sm: 6px;
+	--landing-border-radius-md: 8px;
+	--landing-border-radius-lg: 12px;
 }
 
-.container {
-	background-color: #fff;
-	padding: 20px;
-	border-radius: 8px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Universal box-sizing & base font smoothing */
+.landing-page-body *,
+.landing-page-body *::before,
+.landing-page-body *::after {
+	box-sizing: border-box;
 }
 
-h1,
-h2 {
-	color: #333;
+.landing-page-body {
+	font-family: var(--landing-font-body);
+	margin: 0;
+	background-color: var(--dark-bg);
+	color: var(--dark-text-primary);
+	line-height: 1.65;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
-section {
+.landing-header {
+	background-color: var(--dark-surface-2); /* Slightly different from main bg for subtle separation */
+	color: var(--dark-text-primary);
+	padding: 80px 20px 60px; /* More top padding */
+	text-align: center;
+	border-bottom: 1px solid var(--dark-border);
+}
+
+.landing-header h1 {
+	font-family: var(--landing-font-sans-serif);
+	font-size: clamp(2.2rem, 5vw, 3.2rem); /* Responsive font size */
+	margin-bottom: 0.75rem;
+	font-weight: 700;
+	letter-spacing: -0.5px;
+}
+
+.landing-header .tagline {
+	font-size: clamp(1rem, 2.5vw, 1.25rem);
+	font-weight: 300;
+	color: var(--dark-text-secondary);
+	max-width: 600px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* Container for general centering on landing page */
+.landing-page-body .container {
+	width: 90%;
+	max-width: 1200px; /* Slightly wider for modern feel */
+	margin: 0 auto;
+	padding: 0 15px;
+}
+
+.landing-main {
+	flex-grow: 1;
+	padding-top: 60px;
+	padding-bottom: 60px;
+}
+
+.tools-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 30px; /* Consistent gap */
+}
+
+.tool-card {
+	background-color: var(--dark-surface-1);
+	padding: 35px;
+	border-radius: var(--landing-border-radius-lg);
+	border: 1px solid var(--dark-border);
+	transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+	display: flex;
+	flex-direction: column;
+	box-shadow: 0 2px 4px var(--dark-shadow-light); /* Very subtle initial shadow */
+}
+
+.tool-card:hover {
+	transform: translateY(-6px);
+	border-color: var(--dark-accent-primary);
+	box-shadow: 0 0 25px var(--dark-accent-glow), 0 4px 8px var(--dark-shadow-medium);
+}
+
+.tool-card .tool-icon {
+	font-size: 2.8rem; /* Slightly smaller if using complex icons */
 	margin-bottom: 20px;
-	padding-bottom: 15px;
-	border-bottom: 1px solid #eee;
-}
-section:last-child {
-	border-bottom: none;
-}
-
-input[type='file'],
-button {
-	padding: 10px;
-	margin-top: 5px;
-	border-radius: 4px;
-	border: 1px solid #ccc;
+	/* For SVGs, you'd set width/height and fill here */
+	color: var(--dark-accent-primary); /* Icons inherit accent color */
+	line-height: 1;
+	/* text-align: left; /* Modern cards often align icon left */
 }
 
-button {
-	background-color: #007bff;
-	color: white;
-	cursor: pointer;
-	border: none;
+.tool-card h2 {
+	font-family: var(--landing-font-sans-serif);
+	font-size: 1.5rem; /* Slightly smaller, cleaner heading */
+	color: var(--dark-text-primary);
+	margin-top: 0;
+	margin-bottom: 12px;
+	font-weight: 600;
 }
 
-button:disabled {
-	background-color: #ccc;
-	cursor: not-allowed;
+.tool-card p {
+	font-size: 0.95rem;
+	color: var(--dark-text-secondary);
+	flex-grow: 1;
+	margin-bottom: 25px;
 }
 
-button:hover:not(:disabled) {
-	background-color: #0056b3;
-}
-
-#rankCheckboxes div {
-	margin-bottom: 5px;
-}
-#rankCheckboxes label {
-	margin-left: 8px;
-}
-
-#outputLog {
-	background-color: #e9e9e9;
-	padding: 10px;
-	border-radius: 4px;
-	max-height: 200px;
-	overflow-y: auto;
-	white-space: pre-wrap; /* To wrap long lines */
-	font-family: monospace;
-}
-
-.download-link {
+.btn {
+	/* General button class for landing page */
 	display: inline-block;
-	margin-top: 5px;
-	padding: 8px 12px;
-	background-color: #28a745;
-	color: white;
+	padding: 12px 28px;
+	font-size: 0.95rem;
+	font-weight: 500; /* Medium weight */
+	font-family: var(--landing-font-sans-serif);
+	text-align: center;
+	border-radius: var(--landing-border-radius-md); /* Slightly less rounded than pill */
 	text-decoration: none;
-	border-radius: 4px;
+	transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+	border: 1px solid transparent; /* Base border */
+	cursor: pointer;
+	margin-top: auto; /* Pushes button to bottom */
+	line-height: 1.5;
 }
-.download-link:hover {
-	background-color: #218838;
+
+.btn-primary {
+	background-color: var(--dark-accent-primary);
+	color: var(--dark-surface-2); /* Dark text on bright button for contrast */
+	border-color: var(--dark-accent-primary);
+	font-weight: 600;
+}
+.btn-primary:hover {
+	background-color: var(--dark-accent-primary-hover);
+	border-color: var(--dark-accent-primary-hover);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--dark-accent-glow);
+}
+
+/* Ghost button style for secondary/disabled */
+.btn-secondary {
+	background-color: transparent;
+	color: var(--dark-text-secondary);
+	border: 1px solid var(--dark-border);
+}
+.btn-secondary:hover:not(.disabled-link) {
+	color: var(--dark-text-primary);
+	border-color: var(--dark-text-secondary);
+	background-color: rgba(255, 255, 255, 0.05); /* Very subtle bg on hover */
+}
+
+.btn-secondary.disabled-link {
+	cursor: not-allowed;
+	opacity: 0.5;
+	border-color: var(--dark-border);
+}
+.btn-secondary.disabled-link:hover {
+	background-color: transparent;
+	color: var(--dark-text-secondary); /* Keep color consistent */
+	border-color: var(--dark-border);
+}
+
+.tool-card.disabled .tool-icon,
+.tool-card.disabled h2 {
+	opacity: 0.6;
+}
+
+.landing-footer {
+	text-align: center;
+	padding: 40px 20px;
+	background-color: var(--dark-surface-2); /* Consistent with header */
+	color: var(--dark-text-secondary);
+	font-size: 0.875rem;
+	border-top: 1px solid var(--dark-border);
+	margin-top: 60px; /* Ensure space above footer */
+}
+.landing-footer p {
+	margin: 0;
+}
+
+/* Responsive adjustments for landing page */
+@media (max-width: 768px) {
+	.landing-header {
+		padding: 60px 20px 40px;
+	}
+	.landing-main {
+		padding-top: 40px;
+		padding-bottom: 40px;
+	}
+	.tools-grid {
+		grid-template-columns: 1fr; /* Single column */
+		gap: 25px;
+	}
+	.tool-card {
+		padding: 25px;
+	}
+	.btn {
+		padding: 10px 22px;
+		font-size: 0.9rem;
+	}
 }
