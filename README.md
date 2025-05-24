@@ -2,4 +2,4 @@
 
 A collection of tools for exported iNaturalist data.
 
-Website: https://marinolinic.github.io/inaturalist-help-tools/index.html
+Website: https://marinolinic.github.io/inaturalist-help-tools/
