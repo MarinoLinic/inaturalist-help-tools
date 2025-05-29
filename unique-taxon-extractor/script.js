@@ -27,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		genus: 'species',
 		species: 'subspecies',
 		subspecies: null, // No lower rank in the specified list to count
-		// Note: 'kingdom' is not in your list of ranks to export, so it's not here.
-		// If you add 'kingdom' to your export list, you'd add: kingdom: 'phylum'
 	}
 
 	// --- Initial Setup (remains the same) ---
@@ -107,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							return
 						}
 						logMessage('CSV parsed successfully.')
-						populateRankSelection() // This will offer all taxon_*_name columns
+						populateRankSelection()
 						if (extractButton && Object.keys(RANK_TO_COLUMN_MAPPING).length > 0) {
 							extractButton.disabled = false
 						}
@@ -135,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (!rankCheckboxesDiv || !headers) return
 		rankCheckboxesDiv.innerHTML = ''
 		RANK_TO_COLUMN_MAPPING = {}
-		// This identifies all potential rank columns from the CSV headers
 		const availableRanksForSelection = new Set()
 		headers.forEach((header) => {
 			if (taxonColumnPattern.test(header)) {
@@ -143,16 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
 				if (friendlyName.includes('_')) {
 					friendlyName = friendlyName.replace(/_/g, '')
 				}
-				RANK_TO_COLUMN_MAPPING[friendlyName] = header // Store mapping
+				RANK_TO_COLUMN_MAPPING[friendlyName] = header
 				availableRanksForSelection.add(friendlyName)
 			}
 		})
-
-		// Now, create checkboxes ONLY for the ranks the user specified they care about,
-		// if those ranks were found in the CSV.
-		// Or, if you want to offer all found ranks, but only count for specified ones,
-		// then the filtering happens later. For simplicity of UI, let's stick to offering all found.
-		// The counting logic will then use HIERARCHY_MAP.
 
 		availableRanksForSelection.forEach((friendlyName) => {
 			const checkboxContainer = document.createElement('div')
@@ -179,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	// --- MODIFIED extractButton Event Listener (uses the new HIERARCHY_MAP) ---
+	// --- MODIFIED extractButton Event Listener ---
 	if (extractButton) {
 		extractButton.addEventListener('click', () => {
 			if (!parsedData || parsedData.length === 0) {
@@ -209,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					return
 				}
 
-				// Determine the next lower rank (from your specific list) and its actual column name
 				const nextLowerRankFriendlyName = HIERARCHY_MAP[currentRankFriendlyName]
 				const nextLowerRankActualColumn = nextLowerRankFriendlyName
 					? RANK_TO_COLUMN_MAPPING[nextLowerRankFriendlyName]
@@ -217,25 +207,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				if (nextLowerRankFriendlyName && !nextLowerRankActualColumn) {
 					logMessage(
-						`The next lower rank '${nextLowerRankFriendlyName}' for '${currentRankFriendlyName}' was not found as a column in your CSV. Count will be 0.`,
+						`The next lower rank '${nextLowerRankFriendlyName}' for '${currentRankFriendlyName}' was not found as a column in your CSV. Its count will be 0.`,
 						'warning'
 					)
 				}
 
+				// Map: rankValue -> { lowerRankSet: Set<string>, observationCount: number }
 				const rankDataWithCounts = new Map()
 
 				parsedData.forEach((row) => {
 					const currentRankValue = row[currentRankActualColumn]
 					if (currentRankValue !== undefined && currentRankValue !== null && String(currentRankValue).trim() !== '') {
 						const trimmedCurrentRankValue = String(currentRankValue).trim()
+
 						if (!rankDataWithCounts.has(trimmedCurrentRankValue)) {
-							rankDataWithCounts.set(trimmedCurrentRankValue, new Set())
+							rankDataWithCounts.set(trimmedCurrentRankValue, {
+								lowerRankSet: new Set(),
+								observationCount: 0,
+							})
 						}
+						const currentEntry = rankDataWithCounts.get(trimmedCurrentRankValue)
+						currentEntry.observationCount++ // Increment observation count
+
 						if (nextLowerRankActualColumn) {
-							// Only try to count if the lower rank column exists
 							const lowerRankValue = row[nextLowerRankActualColumn]
 							if (lowerRankValue !== undefined && lowerRankValue !== null && String(lowerRankValue).trim() !== '') {
-								rankDataWithCounts.get(trimmedCurrentRankValue).add(String(lowerRankValue).trim())
+								currentEntry.lowerRankSet.add(String(lowerRankValue).trim())
 							}
 						}
 					}
@@ -243,17 +240,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				if (rankDataWithCounts.size > 0) {
 					const csvDataRows = []
-					rankDataWithCounts.forEach((lowerRankSet, rankValue) => {
-						csvDataRows.push([rankValue, nextLowerRankActualColumn ? lowerRankSet.size : 0])
+					// data is { lowerRankSet, observationCount }
+					rankDataWithCounts.forEach((data, rankValue) => {
+						csvDataRows.push([
+							rankValue,
+							data.observationCount, // Add observation count here
+							nextLowerRankActualColumn ? data.lowerRankSet.size : 0,
+						])
 					})
 
 					csvDataRows.sort((a, b) => String(a[0]).localeCompare(String(b[0])))
 
-					// Make the count column header more specific if a lower rank was identified
-					const countColumnHeader = nextLowerRankFriendlyName ? `${nextLowerRankFriendlyName}_count` : 'items_count' // Fallback header
+					const countColumnHeader = nextLowerRankFriendlyName ? `${nextLowerRankFriendlyName}_count` : 'items_count'
 					const csvContent = generateCsvWithCounts(currentRankFriendlyName, countColumnHeader, csvDataRows)
 					createDownloadLink(currentRankFriendlyName, csvContent)
-					logMessage(`Extracted ${csvDataRows.length} unique '${currentRankFriendlyName}' values with counts.`)
+					logMessage(
+						`Extracted ${csvDataRows.length} unique '${currentRankFriendlyName}' values with counts and observation numbers.`
+					)
 					successfullyExtractedCount++
 				} else {
 					logMessage(
@@ -283,15 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.error('Extract Button element not found!')
 	}
 
-	// --- generateCsvWithCounts (remains the same) ---
+	// --- MODIFIED generateCsvWithCounts ---
 	function generateCsvWithCounts(rankHeader, countHeader, dataRowsArray) {
-		let csvString = `${rankHeader},${countHeader}\n`
+		// dataRowsArray elements are now [rankValue, lowerRankCount, observationCount]
+		let csvString = `${rankHeader},num_observations,${countHeader}\n` // Added num_observations header
 		dataRowsArray.forEach((row) => {
 			let processedRankValue = String(row[0])
 			if (processedRankValue.includes(',') || processedRankValue.includes('\n') || processedRankValue.includes('"')) {
 				processedRankValue = `"${processedRankValue.replace(/"/g, '""')}"`
 			}
-			csvString += `${processedRankValue},${row[1]}\n`
+			// row[1] is lowerRankCount, row[2] is observationCount
+			csvString += `${processedRankValue},${row[1]},${row[2]}\n`
 		})
 		return csvString
 	}
