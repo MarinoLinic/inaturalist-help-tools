@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-	// --- Element Selection (remains the same) ---
+	// --- Element Selection ---
 	const csvFileInput = document.getElementById('csvFileInput')
 	const rankSelectionSection = document.getElementById('rankSelectionSection')
 	const rankCheckboxesDiv = document.getElementById('rankCheckboxes')
@@ -11,13 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
 	const fileNameDisplay = document.getElementById('fileNameDisplay')
 	const currentYearAppSpan = document.getElementById('currentYearApp')
 
+	// New Element Selectors for action buttons and containers
+	const rankSelectionActions = document.getElementById('rankSelectionActions')
+	const selectAllRanksButton = document.getElementById('selectAllRanksButton')
+	const deselectAllRanksButton = document.getElementById('deselectAllRanksButton')
+	const downloadAllActionContainer = document.getElementById('downloadAllActionContainer')
+	const downloadAllButton = document.getElementById('downloadAllButton')
+
 	// --- State Variables ---
 	let parsedData = null
 	let headers = []
 	const taxonColumnPattern = /^taxon_.*_name$/i
 	let RANK_TO_COLUMN_MAPPING = {} // friendlyName: actualColumnName
 
-	// --- Hierarchy for Counting Lower Ranks (REVISED based on your specific list) ---
+	// --- Hierarchy for Counting Lower Ranks ---
 	const HIERARCHY_MAP = {
 		kingdom: 'phylum',
 		phylum: 'class',
@@ -26,15 +33,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		family: 'genus',
 		genus: 'species',
 		species: 'subspecies',
-		subspecies: null, // No lower rank in the specified list to count
+		subspecies: null,
 	}
 
-	// --- Initial Setup (remains the same) ---
+	// --- Initial Setup ---
 	if (currentYearAppSpan) {
 		currentYearAppSpan.textContent = new Date().getFullYear()
 	}
 
-	// --- Helper Functions (logMessage, scrollToElement, scrollToPageBottom, clearPreviousRun remain the same) ---
+	// --- Helper Functions ---
 	function logMessage(message, type = 'info') {
 		if (outputLogPre) {
 			const timestamp = new Date().toLocaleTimeString()
@@ -73,12 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (extractButton) extractButton.disabled = true
 		if (isNewFile && fileNameDisplay) fileNameDisplay.textContent = 'No file selected'
 
+		// Hide new action containers
+		if (rankSelectionActions) rankSelectionActions.style.display = 'none'
+		if (downloadAllActionContainer) downloadAllActionContainer.style.display = 'none'
+
 		parsedData = null
 		headers = []
 		RANK_TO_COLUMN_MAPPING = {}
 	}
 
-	// --- Event Listeners (csvFileInput event listener remains largely the same) ---
+	// --- Event Listeners ---
 	if (csvFileInput) {
 		csvFileInput.addEventListener('change', (event) => {
 			clearPreviousRun(true)
@@ -109,11 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (extractButton && Object.keys(RANK_TO_COLUMN_MAPPING).length > 0) {
 							extractButton.disabled = false
 						}
-						if (rankSelectionSection && Object.keys(RANK_TO_COLUMN_MAPPING).length > 0) {
-							rankSelectionSection.style.display = 'block'
-						} else if (Object.keys(RANK_TO_COLUMN_MAPPING).length === 0) {
-							logMessage('No valid taxonomic rank columns found in the CSV.', 'warning')
-						}
+						// rankSelectionSection display is handled in populateRankSelection
 					},
 					error: (error) => {
 						logMessage(`Error during CSV parsing: ${error.message}`, 'error')
@@ -128,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.error('CSV File Input element not found!')
 	}
 
-	// --- populateRankSelection (offers all taxon_*_name columns found) ---
 	function populateRankSelection() {
 		if (!rankCheckboxesDiv || !headers) return
 		rankCheckboxesDiv.innerHTML = ''
@@ -163,14 +169,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (availableRanksForSelection.size === 0) {
 			logMessage("No columns matching the pattern 'taxon_*_name' found in the CSV headers.", 'warning')
 			if (rankSelectionSection) rankSelectionSection.style.display = 'none'
+			if (rankSelectionActions) rankSelectionActions.style.display = 'none' // Hide actions if no ranks
 			if (extractButton) extractButton.disabled = true
 		} else {
 			logMessage(`Found ${availableRanksForSelection.size} potential taxonomic rank columns for selection.`)
 			if (rankSelectionSection) rankSelectionSection.style.display = 'block'
+			if (rankSelectionActions) rankSelectionActions.style.display = 'flex' // Show actions if ranks exist
+			// extractButton enabling is handled after PapaParse completes
 		}
 	}
 
-	// --- MODIFIED extractButton Event Listener ---
 	if (extractButton) {
 		extractButton.addEventListener('click', () => {
 			if (!parsedData || parsedData.length === 0) {
@@ -183,7 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				return
 			}
 
-			if (downloadLinksContainer) downloadLinksContainer.innerHTML = ''
+			if (downloadLinksContainer) downloadLinksContainer.innerHTML = '' // Clear previous links
+			if (downloadAllActionContainer) downloadAllActionContainer.style.display = 'none' // Hide download all btn initially
 			if (downloadSection) downloadSection.style.display = 'block'
 			logMessage('\n--- Starting Extraction Process ---')
 			let successfullyExtractedCount = 0
@@ -212,14 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					)
 				}
 
-				// Map: rankValue -> { lowerRankSet: Set<string>, observationCount: number }
 				const rankDataWithCounts = new Map()
-
 				parsedData.forEach((row) => {
 					const currentRankValue = row[currentRankActualColumn]
 					if (currentRankValue !== undefined && currentRankValue !== null && String(currentRankValue).trim() !== '') {
 						const trimmedCurrentRankValue = String(currentRankValue).trim()
-
 						if (!rankDataWithCounts.has(trimmedCurrentRankValue)) {
 							rankDataWithCounts.set(trimmedCurrentRankValue, {
 								lowerRankSet: new Set(),
@@ -227,8 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
 							})
 						}
 						const currentEntry = rankDataWithCounts.get(trimmedCurrentRankValue)
-						currentEntry.observationCount++ // Increment observation count
-
+						currentEntry.observationCount++
 						if (nextLowerRankActualColumn) {
 							const lowerRankValue = row[nextLowerRankActualColumn]
 							if (lowerRankValue !== undefined && lowerRankValue !== null && String(lowerRankValue).trim() !== '') {
@@ -240,17 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				if (rankDataWithCounts.size > 0) {
 					const csvDataRows = []
-					// data is { lowerRankSet, observationCount }
 					rankDataWithCounts.forEach((data, rankValue) => {
-						csvDataRows.push([
-							rankValue,
-							data.observationCount, // Add observation count here
-							nextLowerRankActualColumn ? data.lowerRankSet.size : 0,
-						])
+						csvDataRows.push([rankValue, data.observationCount, nextLowerRankActualColumn ? data.lowerRankSet.size : 0])
 					})
-
 					csvDataRows.sort((a, b) => String(a[0]).localeCompare(String(b[0])))
-
 					const countColumnHeader = nextLowerRankFriendlyName ? `${nextLowerRankFriendlyName}_count` : 'items_count'
 					const csvContent = generateCsvWithCounts(currentRankFriendlyName, countColumnHeader, csvDataRows)
 					createDownloadLink(currentRankFriendlyName, csvContent)
@@ -275,7 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				)
 			} else if (successfullyExtractedCount > 0) {
 				logMessage(`Download section updated. ${successfullyExtractedCount} file(s) are ready.`, 'info')
+				if (downloadAllActionContainer) downloadAllActionContainer.style.display = 'block' // Show Download All button
 			}
+
 			if (downloadSection && downloadSection.style.display === 'block') {
 				scrollToElement(downloadSection)
 			} else {
@@ -286,22 +286,56 @@ document.addEventListener('DOMContentLoaded', () => {
 		console.error('Extract Button element not found!')
 	}
 
-	// --- MODIFIED generateCsvWithCounts ---
+	// Event listeners for new Select/Deselect All buttons
+	if (selectAllRanksButton) {
+		selectAllRanksButton.addEventListener('click', () => {
+			const checkboxes = rankCheckboxesDiv.querySelectorAll('input[name="taxonomic_rank"]')
+			checkboxes.forEach((checkbox) => (checkbox.checked = true))
+			logMessage('All available ranks selected.')
+		})
+	}
+
+	if (deselectAllRanksButton) {
+		deselectAllRanksButton.addEventListener('click', () => {
+			const checkboxes = rankCheckboxesDiv.querySelectorAll('input[name="taxonomic_rank"]')
+			checkboxes.forEach((checkbox) => (checkbox.checked = false))
+			logMessage('All available ranks deselected.')
+		})
+	}
+
+	// Event listener for new Download All button
+	if (downloadAllButton) {
+		downloadAllButton.addEventListener('click', () => {
+			const links = downloadLinksContainer.querySelectorAll('a.download-link')
+			if (links.length > 0) {
+				logMessage(
+					`Attempting to download ${links.length} file(s). Your browser might ask for permission for multiple downloads.`,
+					'info'
+				)
+				links.forEach((link, index) => {
+					// Small delay can sometimes help with browser pop-up blockers for multiple downloads,
+					// but often not strictly needed for user-initiated sequence.
+					// setTimeout(() => { link.click(); }, index * 100);
+					link.click()
+				})
+			} else {
+				logMessage('No files available to download with "Download All".', 'warning')
+			}
+		})
+	}
+
 	function generateCsvWithCounts(rankHeader, countHeader, dataRowsArray) {
-		// dataRowsArray elements are now [rankValue, lowerRankCount, observationCount]
-		let csvString = `${rankHeader},num_observations,${countHeader}\n` // Added num_observations header
+		let csvString = `${rankHeader},num_observations,${countHeader}\n`
 		dataRowsArray.forEach((row) => {
 			let processedRankValue = String(row[0])
 			if (processedRankValue.includes(',') || processedRankValue.includes('\n') || processedRankValue.includes('"')) {
 				processedRankValue = `"${processedRankValue.replace(/"/g, '""')}"`
 			}
-			// row[1] is lowerRankCount, row[2] is observationCount
 			csvString += `${processedRankValue},${row[1]},${row[2]}\n`
 		})
 		return csvString
 	}
 
-	// --- createDownloadLink (remains the same) ---
 	function createDownloadLink(rankName, csvContent) {
 		if (!downloadLinksContainer) return
 		const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -310,8 +344,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		link.href = url
 		link.download = `${rankName}.csv`
 		link.textContent = `Download ${rankName}.csv`
-		link.className = 'download-link'
-		const listItem = document.createElement('div')
+		link.className = 'download-link' // This class is used by .btn-app styles and download all
+		const listItem = document.createElement('div') // Each link in its own div for grid layout
 		listItem.appendChild(link)
 		downloadLinksContainer.appendChild(listItem)
 	}

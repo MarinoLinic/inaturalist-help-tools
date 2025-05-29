@@ -261,6 +261,51 @@
 	opacity: 0.7;
 }
 
+/* --- NEW STYLES --- */
+.rank-selection-actions {
+	margin-top: 15px;
+	display: flex; /* This will be set by JS. Initially 'none' via inline style */
+	gap: 10px;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+}
+
+#downloadAllActionContainer {
+	margin-top: 20px;
+	text-align: center; /* This will be set by JS. Initially 'none' via inline style */
+}
+
+.btn-app-secondary {
+	background-color: var(--app-surface-2);
+	color: var(--app-text-primary);
+	border: 1px solid var(--app-border);
+	padding: 8px 16px; /* Smaller padding for utility buttons */
+	font-size: 0.9rem;
+	/* font-weight: 500; /* Inherits from .btn-app */
+}
+
+.btn-app-secondary:hover:not(:disabled) {
+	background-color: var(--app-surface-1);
+	border-color: var(--app-border-hover);
+	transform: translateY(-1px);
+}
+
+.btn-app-secondary:disabled {
+	background-color: var(--app-text-placeholder); /* A more subdued version of its normal bg */
+	color: var(--app-text-secondary);
+	border-color: var(--app-border); /* A more subdued border */
+	cursor: not-allowed;
+	opacity: 0.6;
+	transform: none; /* No transform on disabled state */
+}
+
+/* Ensure these specific secondary buttons don't take full width if .btn-app has a mobile override */
+.rank-selection-actions .btn-app,
+#downloadAllActionContainer .btn-app {
+	width: auto;
+}
+/* --- END NEW STYLES --- */
+
 /* Output Log */
 #outputLogSection pre#outputLog {
 	background-color: var(--app-surface-2); /* Darker bg for log */
@@ -342,8 +387,11 @@
 		grid-template-columns: 1fr; /* Single column for checkboxes */
 	}
 	.btn-app {
-		width: 100%; /* Full width buttons on mobile */
+		/* width: 100%; /* This was commented out, if primary button needs full width, target it specifically */
 		font-size: 0.95rem;
+	}
+	.btn-app-primary {
+		width: 100%;
 	}
 	.download-links-grid {
 		grid-template-columns: 1fr;
