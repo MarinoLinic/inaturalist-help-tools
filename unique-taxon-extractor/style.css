@@ -261,7 +261,7 @@
 	opacity: 0.7;
 }
 
-/* --- NEW STYLES --- */
+/* --- STYLES FOR ACTION BUTTONS --- */
 .rank-selection-actions {
 	margin-top: 15px;
 	display: flex; /* This will be set by JS. Initially 'none' via inline style */
@@ -304,7 +304,7 @@
 #downloadAllActionContainer .btn-app {
 	width: auto;
 }
-/* --- END NEW STYLES --- */
+/* --- END STYLES FOR ACTION BUTTONS --- */
 
 /* Output Log */
 #outputLogSection pre#outputLog {
@@ -327,20 +327,33 @@
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	gap: 12px;
 }
+
+/* MODIFIED STYLES FOR CONSISTENT HEIGHT */
+.download-links-grid > div {
+	/* Target the immediate div children (the grid items) */
+	display: flex; /* Make the grid item itself a flex container */
+	/* This allows the child <a> tag to expand fully within it */
+}
+
 .download-link {
 	/* Applied by JS */
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: flex; /* CHANGED from inline-flex to flex for better growth/alignment control */
+	flex-grow: 1; /* ADDED: Makes the link fill the parent div (grid item) */
+	align-items: center; /* Keeps vertical centering of content */
+	justify-content: center; /* Keeps horizontal centering of content */
+	text-align: center; /* ADDED: Ensures multi-line text is also centered */
 	padding: 10px 15px;
 	background-color: var(--app-accent-secondary);
 	color: var(--app-bg); /* Dark text for contrast */
 	font-weight: 500;
 	text-decoration: none;
 	border-radius: var(--app-border-radius-md);
-	font-size: 0.9rem;
+	font-size: 0.8rem;
 	transition: background-color 0.2s ease, transform 0.1s ease;
+	/* box-sizing: border-box; is global, but important here */
 }
+/* END MODIFIED STYLES */
+
 .download-link:hover {
 	background-color: var(--app-accent-secondary-hover);
 	transform: translateY(-1px);
@@ -394,6 +407,10 @@
 		width: 100%;
 	}
 	.download-links-grid {
-		grid-template-columns: 1fr;
+		grid-template-columns: 1fr; /* Single column on mobile */
+	}
+	/* Ensure even on mobile, the download links behave as block elements */
+	.download-links-grid > div {
+		width: 100%;
 	}
 }
